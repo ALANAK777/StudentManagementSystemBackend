@@ -41,7 +41,14 @@ const studentSchema = new mongoose.Schema({
     default: null
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual field that combines both verification statuses
+studentSchema.virtual('isFullyVerified').get(function() {
+  return this.isVerified || (this.populated('userId') && this.userId?.isEmailVerified);
 });
 
 // Index for efficient queries

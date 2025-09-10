@@ -18,10 +18,39 @@ const getAllStudents = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('userId', 'email isEmailVerified');
 
+    // Enhance each student object with computed verification status
+    const enhancedStudents = students.map(student => {
+      const studentObj = student.toObject();
+      const isUserVerified = student.userId?.isEmailVerified || false;
+      const isStudentVerified = student.isVerified || false;
+      const combinedVerificationStatus = isUserVerified || isStudentVerified;
+      
+      return {
+        ...studentObj,
+        verificationStatus: {
+          userVerified: isUserVerified,
+          studentVerified: isStudentVerified,
+          isVerified: combinedVerificationStatus
+        }
+      };
+    });
+
+    // Debug: Log verification status for troubleshooting (development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📊 Backend - Students verification status:');
+      enhancedStudents.forEach(student => {
+        console.log(`- ${student.name}:`, {
+          'Student.isVerified': student.isVerified,
+          'User.isEmailVerified': student.userId?.isEmailVerified,
+          'Combined.isVerified': student.verificationStatus.isVerified
+        });
+      });
+    }
+
     res.json({
       success: true,
       data: {
-        students,
+        students: enhancedStudents,
         pagination: {
           current: page,
           pages: Math.ceil(total / limit),
