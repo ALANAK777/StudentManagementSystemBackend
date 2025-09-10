@@ -26,19 +26,68 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 console.log('🌐 Configuring CORS policy...');
-// Enable CORS
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
+// Enhanced CORS configuration for Vercel
+app.use((req, res, next) => {
+  const allowedOrigins = process.env.NODE_ENV === 'production' 
     ? [
         'https://student-management-system-frontend-777.vercel.app',
-        process.env.FRONTEND_URL || 'https://your-frontend-app.vercel.app',
-        /\.vercel\.app$/,  // Allow all Vercel subdomains
-        'https://localhost:3000'
-      ]
-    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'], // Added Vite dev server ports
+        'https://student-management-system-frontend-777.vercel.app/',
+        process.env.FRONTEND_URL
+      ].filter(Boolean)
+    : [
+        'http://localhost:3000', 
+        'http://localhost:5173', 
+        'http://localhost:5174'
+      ];
+
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
+
+// Fallback CORS using cors package
+app.use(cors({
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? [
+          'https://student-management-system-frontend-777.vercel.app',
+          process.env.FRONTEND_URL
+        ].filter(Boolean)
+      : [
+          'http://localhost:3000', 
+          'http://localhost:5173', 
+          'http://localhost:5174'
+        ];
+    
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
 
 console.log('🔒 Security headers configured');
@@ -48,6 +97,17 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
+});
+
+console.log('⚡ Adding global OPTIONS handler...');
+// Global OPTIONS handler for all routes
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://student-management-system-frontend-777.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.status(200).end();
 });
 
 console.log('🛣️  Setting up API routes...');

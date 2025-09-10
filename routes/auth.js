@@ -15,6 +15,15 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Handle OPTIONS requests for CORS preflight
+router.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://student-management-system-frontend-777.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.status(200).end();
+});
+
 // Validation rules
 const signupValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
