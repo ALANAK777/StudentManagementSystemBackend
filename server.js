@@ -1,9 +1,25 @@
 const app = require('./app');
 
 const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 STUDENT MANAGEMENT SYSTEM API');
+  console.log('='.repeat(60));
+  console.log(`📊 Environment: ${NODE_ENV.toUpperCase()}`);
+  console.log(`🌐 Server URL: http://localhost:${PORT}`);
+  console.log(`⚡ API Base URL: http://localhost:${PORT}/api`);
+  console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
+  console.log('='.repeat(60));
+  console.log('📋 Available Endpoints:');
+  console.log('   📝 Auth: /api/auth/*');
+  console.log('   👥 Students: /api/students/*');
+  console.log('   📧 Email Verification: /api/auth/verify-student/:token');
+  console.log('   🔑 Password Reset: /api/auth/reset-password/:token');
+  console.log('='.repeat(60));
+  console.log(`✅ Server successfully started at ${new Date().toLocaleString()}`);
+  console.log('='.repeat(60) + '\n');
 });
 
 // Handle unhandled promise rejections

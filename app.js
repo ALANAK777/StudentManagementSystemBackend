@@ -5,19 +5,27 @@ const connectDB = require('./config/database');
 // Load env vars
 require('dotenv').config();
 
+// Display startup information
+console.log('⚙️  Initializing Student Management System API...');
+console.log(`🔧 Node Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log('📦 Loading application modules...');
+
 // Route files
 const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
 
 const app = express();
 
+console.log('🔗 Establishing database connection...');
 // Connect to database
 connectDB();
 
+console.log('🛠️  Configuring middleware...');
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+console.log('🌐 Configuring CORS policy...');
 // Enable CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
@@ -32,6 +40,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+console.log('🔒 Security headers configured');
 // Security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -40,9 +49,14 @@ app.use((req, res, next) => {
   next();
 });
 
+console.log('🛣️  Setting up API routes...');
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
+
+console.log('✅ Authentication routes: /api/auth/*');
+console.log('✅ Student routes: /api/students/*');
+console.log('🏥 Health check route: /api/health');
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -100,6 +114,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+console.log('🔧 Configuring 404 handler...');
 // Handle 404
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -107,5 +122,8 @@ app.use('*', (req, res) => {
     message: 'Route not found'
   });
 });
+
+console.log('🎯 Application configuration completed successfully!');
+console.log('🚀 Ready to start server...\n');
 
 module.exports = app;
