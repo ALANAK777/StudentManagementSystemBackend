@@ -356,7 +356,7 @@ const verifyStudent = async (req, res) => {
     const student = await Student.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() }
-    });
+    }).populate('userId');
 
     if (!student) {
       return res.status(400).json({
@@ -370,6 +370,12 @@ const verifyStudent = async (req, res) => {
     student.verificationToken = null;
     student.verificationTokenExpires = null;
     await student.save();
+
+    // Also mark the user as email verified
+    if (student.userId) {
+      student.userId.isEmailVerified = true;
+      await student.userId.save();
+    }
 
     res.json({
       success: true,
