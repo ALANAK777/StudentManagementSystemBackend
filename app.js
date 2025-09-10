@@ -30,6 +30,7 @@ console.log('🌐 Configuring CORS policy...');
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
+        'https://student-management-system-frontend-777.vercel.app',
         process.env.FRONTEND_URL || 'https://your-frontend-app.vercel.app',
         /\.vercel\.app$/,  // Allow all Vercel subdomains
         'https://localhost:3000'
